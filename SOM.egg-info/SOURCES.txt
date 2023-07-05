@@ -1,0 +1,7 @@
+README.md
+setup.py
+SOM.egg-info/PKG-INFO
+SOM.egg-info/SOURCES.txt
+SOM.egg-info/dependency_links.txt
+SOM.egg-info/requires.txt
+SOM.egg-info/top_level.txt
