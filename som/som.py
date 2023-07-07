@@ -1,6 +1,6 @@
 '''
 Self-Organizing Maps
-Last Modify: 18-05-2023
+Last Modify: 07-07-2023
 '''
 
 import numpy as np
@@ -11,6 +11,23 @@ from time import time
 
 #import sys
 #sys.setrecursionlimit(999)
+
+def adjust_clusters(clusters:list):
+    """
+    Adjusts the excess clustering number
+    """
+    clusters_new = []
+    c_ = {}
+    c_sort = sorted(clusters)
+    i = 0
+    for cl in c_sort:
+        if not cl in c_:
+            c_[cl] = i
+            i += 1
+
+    for i in range(len(clusters)):
+        clusters_new.append(c_[clusters[i]])
+    return clusters_new
 
 def transpose(data):
     return [[data[i][j] for i in range(len(data))] for j in range(len(data[0]))]
@@ -546,7 +563,7 @@ class Neuron:
                             
                     return rotate()
 
-    def valley(self, normalize = False, potency = 1):
+    def valley(self, normalize = False, potency = 1, **args):
         """
         Makes a graph showing the valleys (matrix-U), clearly separated valleys indicate a possible group
         """
@@ -605,6 +622,10 @@ class Neuron:
             for j in range(len(l[0])):
                 l[i][j] = [int(l[i][j] * potency), 255 - int(l[i][j] * potency), 200]
 
+        if not "figsize" in args:
+            args["figsize"] = (7,5)
+            
+        fig, ax = plt.subplots(figsize = args["figsize"])
         plt.imshow(l)#, cmap='gray')
         plt.axis('off')
         plt.title("Valley Graph (Matrix-U)")
@@ -612,7 +633,7 @@ class Neuron:
 
         return s
 
-    def amount_of_wins(self):
+    def amount_of_wins(self, **args):
         """
         Shows the number of wins for each neuron
         """
@@ -632,22 +653,23 @@ class Neuron:
         for i in range(globals()["number_of_neurons_"]):
             for j in range(globals()["number_of_neurons_"]):
                 exec(f"data[{i}][{j}] = n{i}_{j}.number_of_wins")
-            
+
         np.array(data)
+
+        if not "figsize" in args:
+            args["figsize"] = (7,5)
+            
+        fig, ax = plt.subplots(figsize = args["figsize"])
         plt.imshow(data, cmap='hot')
         plt.title("Amount of Wins")
         plt.colorbar()
         plt.show()
 
-    def predict(self, observation, labels = None):
+    def predict(self, labels = None, **args):
         """
-        Returns the predictions by neuron in addition to a graph,
-        or if the list of observations is passed,
-        it returns that prediction and specific me
-
-        If you pass the labels "labels:list",
-        you will get a graph with the labels for each neuron
+        Returns the predictions by neuron in addition to a graph if you pass the labels "labels:list"
         """
+        observation = globals()["global_som_data"]
                 
         def dist(a, b):
             if not len(a) == len(b):
@@ -729,16 +751,20 @@ class Neuron:
 
                 cor = div_lista([[cores(valores_unicos.tolist().index(valor))] for linha in dados for valor in linha])
 
+                if not "figsize" in args:
+                    args["figsize"] = (globals()["number_of_neurons_"]/2, globals()["number_of_neurons_"]/3)
+                    
                 #print(list_image, len(image.keys()))
-                fig, ax = plt.subplots()
+                fig, ax = plt.subplots(figsize = args["figsize"])
                 tabela = ax.table(cellText = list_image,
                                   cellColours = cor,
                                   loc = 'center',
                                   cellLoc = 'center')
                 tabela.auto_set_font_size(False)
                 tabela.set_fontsize(10)
-                tabela.scale(1, 1)
+                tabela.scale(1, 1.7)
                 ax.axis('off')
+                plt.suptitle("Clustering with Labels")
                 plt.show()
                 
             return clusters
@@ -824,7 +850,7 @@ def create_SOM(x:int = 5, learning:float = 0.01):
     3) n0_0.auto_organizing(epochs = 10, print_ = True)
     4) n1_1.valley(normalize = True, potency = 1)
     5) n1_1.amount_of_wins()
-    6) clusters = n1_1.predict(dados)
+    6) clusters = n1_1.predict()
     """
     #Crio os neuronios:
     SOM = []
@@ -878,7 +904,7 @@ if __name__ == "__main__":
     #print(sorted(a))
     #print(sorted(adjust(a)))
 
-    SOM = create_SOM(4, learning = 0.5)
+    SOM = create_SOM(20, learning = 0.05)
 
 ##    #Crio dados ficticios
 ##    dado_1 = uniform([3, 0], 2,times = 10)
@@ -910,9 +936,10 @@ if __name__ == "__main__":
     n1_1.design_weights(dados)
 
     #Uma iteração de auto organização:
-    n0_0.auto_organizing(epochs = 25, print_ = True)
+    n0_0.auto_organizing(epochs = 5, print_ = True)
 
-    clusters = n1_1.predict(dados, labels = rotulos)
+    clusters = n1_1.predict(labels = rotulos)
+    new_clusters = adjust_clusters(clusters)
 
     n1_1.valley(normalize = True, potency = 1)
 
