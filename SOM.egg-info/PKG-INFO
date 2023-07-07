@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: SOM
-Version: 0.0.1
+Version: 0.0.2
 Summary: Self Organizing Maps
 Home-page: UNKNOWN
 Author: Ian dos Anjos
@@ -8,7 +8,7 @@ Author-email: <iannaianjos@gmail.com>
 License: UNKNOWN
 Description: 
         # som
-Keywords: python,som,clustering
+Keywords: python,som,SOM,clustering
 Platform: UNKNOWN
 Classifier: Development Status :: 1 - Planning
 Classifier: Intended Audience :: Developers
