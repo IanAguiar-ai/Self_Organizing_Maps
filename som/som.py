@@ -3,6 +3,9 @@ Self-Organizing Maps
 Last Modify: 18-05-2023
 '''
 
+import numpy as np
+import matplotlib.pyplot as plt
+import pandas as pd
 from random import random, seed
 from time import time
 
@@ -34,10 +37,6 @@ def variance_distance(d):
     return distance**(1/2)
             
 def rotate45(matrix):
-    import numpy as np
-    import pandas as pd
-    #from scipy.ndimage import rotate
-
     if type(matrix) == list:
         matrix = np.array(matrix)
 
@@ -187,9 +186,9 @@ def normalize(data):
     data = data.values.tolist()
 
     data = transpose(data)
-
+    
     for i in range(len(data)):
-        print(i)
+        print(f"Adjust column {i}")
         data[i] = adjust(data[i])
 
     return transpose(data)
@@ -243,7 +242,7 @@ class Neuron:
 
     def network_size(self):
         '''
-        Counts the size of the grid of neurons.
+        Counts the size of the grid of neurons
         '''
         k = self
         while True:
@@ -549,7 +548,7 @@ class Neuron:
 
     def valley(self, normalize = False, potency = 1):
         """
-        Makes a graph showing the valleys, clearly separated valleys indicate a possible group
+        Makes a graph showing the valleys (matrix-U), clearly separated valleys indicate a possible group
         """
         n = globals()["number_of_neurons_"]
         l = n * 2 - 1
@@ -604,26 +603,19 @@ class Neuron:
 
         for i in range(len(l)):
             for j in range(len(l[0])):
-                l[i][j] = [int(l[i][j] * potency), 255 - int(l[i][j] * potency), 50]
-                    
-            
-
-        import numpy as np
-        import matplotlib.pyplot as plt
+                l[i][j] = [int(l[i][j] * potency), 255 - int(l[i][j] * potency), 200]
 
         plt.imshow(l)#, cmap='gray')
         plt.axis('off')
+        plt.title("Valley Graph (Matrix-U)")
         plt.show()
 
         return s
 
     def amount_of_wins(self):
         """
-        Shows the number of wins for each neuron.
+        Shows the number of wins for each neuron
         """
-        import numpy as np
-        import matplotlib.pyplot as plt
-
         for i in range(globals()["number_of_neurons_"]):
             for j in range(globals()["number_of_neurons_"]):
                 globals()[f"n{i}_{j}"].number_of_wins = 0
@@ -643,9 +635,117 @@ class Neuron:
             
         np.array(data)
         plt.imshow(data, cmap='hot')
+        plt.title("Amount of Wins")
         plt.colorbar()
         plt.show()
+
+    def predict(self, observation, labels = None):
+        """
+        Returns the predictions by neuron in addition to a graph,
+        or if the list of observations is passed,
+        it returns that prediction and specific me
+
+        If you pass the labels "labels:list",
+        you will get a graph with the labels for each neuron
+        """
                 
+        def dist(a, b):
+            if not len(a) == len(b):
+                print("The dataframe is not the same length")
+                return
+            sum_ = 0
+            for i in range(len(a)):
+                sum_ += (a[i] - b[i]) ** 2
+
+            return sum_
+
+        l_global = []
+        i = 0
+        while True:
+            j, l_local = 0, []
+            while True:
+                try:
+                    l_local.append(globals()[f"n{i}_{j}"].weights)
+                    j += 1
+                except:
+                    break
+            if j == 0:
+                break
+            i += 1
+            l_global.append(l_local)
+
+        if len(observation) != len(l_global[0][0]): 
+            clusters = []
+            for k in range(len(observation)): #Cluster list
+                min_ = dist(l_global[0][0], observation[k])
+                clusters_temp = 0
+                for i in range(len(l_global)):
+                    for j in range(len(l_global[0])):
+                        if min_ > dist(l_global[i][j], observation[k]):
+                            clusters_temp = i * len(l_global) + j
+                            min_ = dist(l_global[i][j], observation[k])
+                clusters.append(clusters_temp)
+
+            if labels != None: #Map of cluster
+                image = {}
+                for i in range(len(l_global)):
+                    for j in range(len(l_global[0])):
+                        min_ = dist(l_global[0][0], observation[k])
+                        image[f"{i}_{j}"] = labels[0]
+                        for k in range(len(observation)):
+                            if min_ > dist(l_global[i][j], observation[k]):
+                                image[f"{i}_{j}"] = labels[k]
+                                min_ = dist(l_global[i][j], observation[k])
+
+                list_image = []
+                for i in range(len(l_global)):
+                    list_image_temp = []
+                    for j in range(len(l_global[0])):
+                        list_image_temp.append(image[f"{i}_{j}"])
+                    list_image.append(list_image_temp)
+
+
+                def div_lista(l:list):
+                    t = int(len(l)**(1/2))
+                    k = [[0 for i in range(t)] for i in range(t)]
+                    for i in range(len(k)):
+                        for j in range(len(k[0])):
+                            l_ = l[i * len(k) + j]
+                            k[i][j] = l_[0]
+                    return k
+                    
+                dados = list_image
+                        
+                # Obter todos os valores únicos da tabela
+                valores_unicos = np.unique([valor for linha in dados for valor in linha])
+
+                # Gerar uma lista de cores correspondente aos valores únicos
+                cores = plt.cm.get_cmap('Set3', len(valores_unicos))
+
+                cor = div_lista([[cores(valores_unicos.tolist().index(valor))] for linha in dados for valor in linha])
+
+                #print(list_image, len(image.keys()))
+                fig, ax = plt.subplots()
+                tabela = ax.table(cellText = list_image,
+                                  cellColours = cor,
+                                  loc = 'center',
+                                  cellLoc = 'center')
+                tabela.auto_set_font_size(False)
+                tabela.set_fontsize(10)
+                tabela.scale(1, 1)
+                ax.axis('off')
+                plt.show()
+                
+            return clusters
+        
+        else:
+            min_ = dist(l_global[0][0], observation)
+            for i in range(len(l_global)):
+                for j in range(len(l_global[0])):
+                    if min_ > dist(l_global[i][j], observation):
+                        clusters_temp = i * len(l_global) + j
+                        min_ = dist(l_global[i][j], observation)
+            return clusters_temp
 
     def name(self):
         """
@@ -719,6 +819,7 @@ def create_SOM(x:int = 5, learning:float = 0.01):
     3) n0_0.auto_organizing(epochs = 10, print_ = True)
     4) n1_1.valley(normalize = True, potency = 1)
     5) n1_1.amount_of_wins()
+    6) clusters = n1_1.predict(dados)
     """
     #Crio os neuronios:
     SOM = []
@@ -772,7 +873,7 @@ if __name__ == "__main__":
     #print(sorted(a))
     #print(sorted(adjust(a)))
 
-    SOM = create_SOM(20, learning = 0.05)
+    SOM = create_SOM(4, learning = 0.5)
 
 ##    #Crio dados ficticios
 ##    dado_1 = uniform([3, 0], 2,times = 10)
@@ -788,6 +889,7 @@ if __name__ == "__main__":
 
     import pandas as pd
     dados = pd.read_csv("DATA_CETESB_BY_CODE.csv")
+    rotulos = list(map(lambda x: x[:2],list(dados["code"])))
 
     c = dados.columns
     dados = dados.drop(columns = [*c[0:3],])
@@ -803,7 +905,9 @@ if __name__ == "__main__":
     n1_1.design_weights(dados)
 
     #Uma iteração de auto organização:
-    n0_0.auto_organizing(epochs = 10, print_ = True)
+    n0_0.auto_organizing(epochs = 25, print_ = True)
+
+    clusters = n1_1.predict(dados, labels = rotulos)
 
     n1_1.valley(normalize = True, potency = 1)
 
