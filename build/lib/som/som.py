@@ -852,6 +852,16 @@ def create_SOM(x:int = 5, learning:float = 0.01):
     5) n1_1.amount_of_wins()
     6) clusters = n1_1.predict()
     """
+
+    if "number_of_neurons_" in globals():
+        print("Deleting old SOM template")
+        n_ = globals()["number_of_neurons_"]
+        for i in range(n_):
+            for j in range(n_):
+                del globals()[f"n{i}_{j}"]
+
+        globals()["number_of_neurons_"] = x
+    
     #Crio os neuronios:
     SOM = []
     for i in range(x):
@@ -932,6 +942,23 @@ if __name__ == "__main__":
     
     dados = dados.values.tolist()
 
+    #Crio a grade que conecta a vizinhança:
+    n1_1.design_weights(dados)
+
+    #Uma iteração de auto organização:
+    n0_0.auto_organizing(epochs = 5, print_ = True)
+
+    clusters = n1_1.predict(labels = rotulos)
+    new_clusters = adjust_clusters(clusters)
+
+    n1_1.valley(normalize = True, potency = 1)
+
+    n1_1.amount_of_wins()
+
+
+
+
+    SOM = create_SOM(5, learning = 0.05)
     #Crio a grade que conecta a vizinhança:
     n1_1.design_weights(dados)
 
