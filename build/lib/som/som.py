@@ -5,6 +5,7 @@ Last Modify: 07-07-2023
 
 import numpy as np
 import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 import pandas as pd
 from random import random, seed
 from time import time
@@ -629,6 +630,30 @@ class Neuron:
         plt.imshow(l)#, cmap='gray')
         plt.axis('off')
         plt.title("Valley Graph (Matrix-U)")
+        plt.show()
+
+        def separate(s):
+            n_s = [[0 for i in range(len(s))] for i in range(len(s))]
+            for i in range(len(s)):
+                for j in range(len(s)):
+                    n_s[i][j] = s[i][j][0]
+            return n_s
+
+        x = np.arange(0, globals()["number_of_neurons_"] * 2 - 1)
+        y = np.arange(0, globals()["number_of_neurons_"] * 2 - 1)
+        x, y = np.meshgrid(x, y)
+        altitude = np.array(separate(l))
+        
+        # Criar a figura e o eixo 3D
+        fig = plt.figure(figsize = args["figsize"])
+        ax = fig.add_subplot(111, projection='3d')
+
+        # Plotar a superfície 3D
+        ax.plot_surface(x, y, altitude, cmap = 'cividis')
+        ax.set_xlabel('Neurons')
+        ax.set_ylabel('Neurons')
+        ax.set_zlabel('Distance')
+
         plt.show()
 
         return s
