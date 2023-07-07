@@ -659,6 +659,11 @@ class Neuron:
 
             return sum_
 
+        try:
+            observation = observation.values.tolist()
+        except:
+            pass
+        
         l_global = []
         i = 0
         while True:
