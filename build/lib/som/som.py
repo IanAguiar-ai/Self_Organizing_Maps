@@ -630,7 +630,12 @@ class Neuron:
         plt.imshow(l)#, cmap='gray')
         plt.axis('off')
         plt.title("Valley Graph (Matrix-U)")
-        plt.show()
+        if "savefig" in args:
+            plt.savefig(args["savefig"] + ".png", bbox_inches='tight')
+            plt.clf()
+            plt.cla()
+        else:
+            plt.show()
 
         def separate(s):
             n_s = [[0 for i in range(len(s))] for i in range(len(s))]
@@ -654,7 +659,12 @@ class Neuron:
         ax.set_ylabel('Neurons')
         ax.set_zlabel('Distance')
 
-        plt.show()
+        if "savefig" in args:
+            plt.savefig(args["savefig"] + "_3d.png", bbox_inches='tight')
+            plt.clf()
+            plt.cla()
+        else:
+            plt.show()
 
         return s
 
@@ -688,7 +698,12 @@ class Neuron:
         plt.imshow(data, cmap='hot')
         plt.title("Amount of Wins")
         plt.colorbar()
-        plt.show()
+        if "savefig" in args:
+            plt.savefig(args["savefig"] + ".png", bbox_inches='tight')
+            plt.clf()
+            plt.cla()
+        else:
+            plt.show()
 
     def predict(self, labels = None, **args):
         """
@@ -790,7 +805,12 @@ class Neuron:
                 tabela.scale(1, 1.7)
                 ax.axis('off')
                 plt.suptitle("Clustering with Labels")
-                plt.show()
+                if "savefig" in args:
+                    plt.savefig(args["savefig"] + ".png", bbox_inches='tight')
+                    plt.clf()
+                    plt.cla()
+                else:
+                    plt.show()
                 
             return clusters
         
@@ -980,20 +1000,28 @@ if __name__ == "__main__":
 
     n1_1.amount_of_wins()
 
+##
+##
+##
+##    SOM = create_SOM(20, learning = 0.005)
+##    #Crio a grade que conecta a vizinhança:
+##    n1_1.design_weights(dados)
+##
+##    i = 0
+##    n0_0.auto_organizing(epochs = 0, print_ = True)
+##    clusters = n1_1.predict(labels = rotulos, savefig = f"C:\\Users\\Usuario\\Desktop\\img_som_int\predict\\\predict_som_{i}")
+##    n1_1.valley(normalize = True, potency = 1, savefig = f"C:\\Users\\Usuario\\Desktop\\img_som_int\\valley\\predict_som_{i}")
+##    n1_1.amount_of_wins(savefig = f"C:\\Users\\Usuario\\Desktop\\img_som_int\\amount\\predict_som_{i}")
+##        
+##    #Uma iteração de auto organização:
+##    for i in range(1, 500):
+##        print(f"Save {i}")
+##        n0_0.auto_organizing(epochs = 1, print_ = True)
+##        clusters = n1_1.predict(labels = rotulos, savefig = f"C:\\Users\\Usuario\\Desktop\\img_som_int\predict\\\predict_som_{i}")
+##        n1_1.valley(normalize = True, potency = 1, savefig = f"C:\\Users\\Usuario\\Desktop\\img_som_int\\valley\\predict_som_{i}")
+##        n1_1.amount_of_wins(savefig = f"C:\\Users\\Usuario\\Desktop\\img_som_int\\amount\\predict_som_{i}")
+##        
+##    new_clusters = adjust_clusters(clusters)   
 
-
-
-    SOM = create_SOM(5, learning = 0.05)
-    #Crio a grade que conecta a vizinhança:
-    n1_1.design_weights(dados)
-
-    #Uma iteração de auto organização:
-    n0_0.auto_organizing(epochs = 5, print_ = True)
-
-    clusters = n1_1.predict(labels = rotulos)
-    new_clusters = adjust_clusters(clusters)
-
-    n1_1.valley(normalize = True, potency = 1)
-
-    n1_1.amount_of_wins()
+    
 
