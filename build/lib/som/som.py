@@ -633,7 +633,11 @@ class Neuron:
 
         for i in range(len(l)):
             for j in range(len(l[0])):
-                l[i][j] = [int(l[i][j] * potency), 255 - int(l[i][j] * potency), 200]
+                try:
+                    l[i][j] = [int(l[i][j] * potency), 255 - int(l[i][j] * potency), 200]
+                except ValueError:
+                    warnings.warn(f"Overflow in line {i} column {j}")
+                    l[i][j] = [0, 0, 0]
 
         if not "figsize" in args:
             args["figsize"] = (7,5)
@@ -973,7 +977,7 @@ if __name__ == "__main__":
     #print(sorted(a))
     #print(sorted(adjust(a)))
 
-    SOM = create_SOM(8, learning = 0.05)
+    SOM = create_SOM(20, learning = 0.05)
 
 ##    #Crio dados ficticios
 ##    dado_1 = uniform([3, 0], 2,times = 10)
@@ -987,32 +991,32 @@ if __name__ == "__main__":
 ##            for k in range(0, 11, 1):
 ##                dados.append([i,j,k])
 
-    import pandas as pd
-    dados = pd.read_csv("DATA_CETESB_BY_CODE.csv")
-    rotulos = list(map(lambda x: x[:2],list(dados["code"])))
-
-    c = dados.columns
-    dados = dados.drop(columns = [*c[0:3],])
-    c = dados.columns
-    dados = dados.reindex(columns = [*c[-2:], *c[:-2]])
-    #dados = dados.drop(columns = [*c[:-2]])
-
-    #dados = dados.apply(lambda x: (x - x.min()) / (x.max() - x.min()))
-    
-    dados = dados.values.tolist()
-
-    #Crio a grade que conecta a vizinhança:
-    n1_1.design_weights(dados)
-
-    #Uma iteração de auto organização:
-    n0_0.auto_organizing(epochs = 5, print_ = True)
-
-    clusters = n1_1.predict(labels = rotulos)
-    new_clusters = adjust_clusters(clusters)
-
-    n1_1.valley(normalize = True, potency = 1)
-
-    n1_1.amount_of_wins()
+##    import pandas as pd
+##    dados = pd.read_csv("DATA_CETESB_BY_CODE.csv")
+##    rotulos = list(map(lambda x: x[:2],list(dados["code"])))
+##
+##    c = dados.columns
+##    dados = dados.drop(columns = [*c[0:3],])
+##    c = dados.columns
+##    dados = dados.reindex(columns = [*c[-2:], *c[:-2]])
+##    #dados = dados.drop(columns = [*c[:-2]])
+##
+##    #dados = dados.apply(lambda x: (x - x.min()) / (x.max() - x.min()))
+##    
+##    dados = dados.values.tolist()
+##
+##    #Crio a grade que conecta a vizinhança:
+##    n1_1.design_weights(dados)
+##
+##    #Uma iteração de auto organização:
+##    n0_0.auto_organizing(epochs = 5, print_ = True)
+##
+##    clusters = n1_1.predict(labels = rotulos)
+##    new_clusters = adjust_clusters(clusters)
+##
+##    n1_1.valley(normalize = True, potency = 1)
+##
+##    n1_1.amount_of_wins()
 
 ##
 ##
@@ -1042,8 +1046,9 @@ if __name__ == "__main__":
     rotulos = list(map(lambda x: x[:2],list(dados["code"])))
 
     c = dados.columns
-    dados = dados.drop(columns = [*c[0:3],])
+    dados = dados.drop(columns = [*c[0:2]])
     dados = dados.drop(columns = ["mercury"])
+    dados = dados.drop(columns = [*c[-2:]])
     c = dados.columns
     dados = dados.reindex(columns = [*c[-2:], *c[:-2]])
     conferir = dados.copy()
@@ -1057,7 +1062,7 @@ if __name__ == "__main__":
     n1_1.design_weights(dados)
 
     #Uma iteração de auto organização:
-    n0_0.auto_organizing(epochs = 5, print_ = True)
+    n0_0.auto_organizing(epochs = 20, print_ = True)
 
     clusters = n1_1.predict(labels = rotulos)
     new_clusters = adjust_clusters(clusters)
