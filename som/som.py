@@ -804,7 +804,9 @@ class Neuron:
                 tabela.set_fontsize(10)
                 tabela.scale(1, 1.7)
                 ax.axis('off')
-                plt.suptitle("Clustering with Labels")
+                if globals()["number_of_neurons_"] > 7:
+                    plt.suptitle("Clustering with Labels")
+                    
                 if "savefig" in args:
                     plt.savefig(args["savefig"] + ".png", bbox_inches='tight')
                     plt.clf()
@@ -959,7 +961,7 @@ if __name__ == "__main__":
     #print(sorted(a))
     #print(sorted(adjust(a)))
 
-    SOM = create_SOM(20, learning = 0.05)
+    SOM = create_SOM(8, learning = 0.05)
 
 ##    #Crio dados ficticios
 ##    dado_1 = uniform([3, 0], 2,times = 10)
