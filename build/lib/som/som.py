@@ -9,9 +9,14 @@ from mpl_toolkits.mplot3d import Axes3D
 import pandas as pd
 from random import random, seed
 from time import time
+import warnings
 
 #import sys
 #sys.setrecursionlimit(999)
+
+class GeneralError(Exception):
+    def __init__(self, mensage):
+        self.mensage = mensage
 
 def adjust_clusters(clusters:list):
     """
@@ -31,6 +36,13 @@ def adjust_clusters(clusters:list):
     return clusters_new
 
 def transpose(data):
+    for i in range(len(data)):
+        try:
+            for j in range(len(data[i])):
+                pass
+        except:
+            warnings.warn(f"Error in column {i} of your dataframe, please remove it!\n\n")
+            return None
     return [[data[i][j] for i in range(len(data))] for j in range(len(data[0]))]
 
 def variance_distance(d):
@@ -1025,5 +1037,32 @@ if __name__ == "__main__":
 ##        
 ##    new_clusters = adjust_clusters(clusters)   
 
+    import pandas as pd
+    dados = pd.read_csv("DATA_CETESB_MEAN.csv")
+    rotulos = list(map(lambda x: x[:2],list(dados["code"])))
+
+    c = dados.columns
+    dados = dados.drop(columns = [*c[0:3],])
+    dados = dados.drop(columns = ["mercury"])
+    c = dados.columns
+    dados = dados.reindex(columns = [*c[-2:], *c[:-2]])
+    conferir = dados.copy()
+    #dados = dados.drop(columns = [*c[:-2]])
+
+    #dados = dados.apply(lambda x: (x - x.min()) / (x.max() - x.min()))
     
+    dados = dados.values.tolist()
+
+    #Crio a grade que conecta a vizinhança:
+    n1_1.design_weights(dados)
+
+    #Uma iteração de auto organização:
+    n0_0.auto_organizing(epochs = 5, print_ = True)
+
+    clusters = n1_1.predict(labels = rotulos)
+    new_clusters = adjust_clusters(clusters)
+
+    n1_1.valley(normalize = True, potency = 1)
+
+    n1_1.amount_of_wins()
 
