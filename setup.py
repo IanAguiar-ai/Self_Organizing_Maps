@@ -7,7 +7,7 @@ here = os.path.abspath(os.path.dirname(__file__))
 with codecs.open(os.path.join(here, "README.md"), encoding="utf-8") as fh:
     long_description = "\n" + fh.read()
 
-VERSION = '0.0.6'
+VERSION = '0.0.7'
 DESCRIPTION = 'Self Organizing Maps'
 LONG_DESCRIPTION = 'The library was built to run SOM'
 
@@ -21,7 +21,7 @@ setup(
     long_description_content_type="text/markdown",
     long_description=long_description,
     packages=find_packages(),
-    install_requires=['matplotlib', 'numpy', 'pandas'],
+    install_requires=['matplotlib', 'numpy', 'pandas', 'scipy'],
     keywords=['python', 'som', 'SOM', 'clustering'],
     classifiers=[
         "Development Status :: 1 - Planning",

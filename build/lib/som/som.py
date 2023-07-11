@@ -10,6 +10,7 @@ import pandas as pd
 from random import random, seed
 from time import time
 import warnings
+from scipy.cluster.hierarchy import dendrogram, linkage, fcluster
 
 #import sys
 #sys.setrecursionlimit(999)
@@ -18,10 +19,19 @@ class GeneralError(Exception):
     def __init__(self, mensage):
         self.mensage = mensage
 
-def adjust_clusters(clusters:list):
+def adjust_clusters(clusters:list, distance = None):
     """
     Adjusts the excess clustering number
     """
+
+    if distance == None:
+        join = globals()["n1_1"].dendrogram(print_ = False)
+    else:
+        join = globals()["n1_1"].dendrogram(distance = distance, print_ = False)
+    for i in range(len(clusters)):
+        clusters[i] = join[clusters[i]]
+        
+    
     clusters_new = []
     c_ = {}
     c_sort = sorted(clusters)
@@ -29,7 +39,7 @@ def adjust_clusters(clusters:list):
     for cl in c_sort:
         if not cl in c_:
             c_[cl] = i
-            i += 1
+            i += 1    
 
     for i in range(len(clusters)):
         clusters_new.append(c_[clusters[i]])
@@ -248,6 +258,14 @@ class Neuron:
 
         #Amount of data the neuron gains
         self.number_of_wins = 0
+
+    def vector_of_weights(self):
+        vector = []
+        for i in range(globals()["number_of_neurons_"]):
+            for j in range(globals()["number_of_neurons_"]):
+                vector.append(globals()[f"n{i}_{j}"].weights)
+        return vector
+                
 
     def connect(self, obj_r = None, obj_l = None, obj_u = None, obj_d = None):
         '''
@@ -841,6 +859,42 @@ class Neuron:
                         min_ = dist(l_global[i][j], observation)
             return clusters_temp
 
+    def dendrogram(self, distance = None, print_ = True, **args):
+        """
+        Shows the hierarchical grouping of the SOM
+        """
+
+        neuron_positions = np.array(self.vector_of_weights())
+        if distance == None:
+            distance = np.mean(np.var(neuron_positions, axis = 0)**(1/2))
+        if print_:
+            print(f"Max distance to join neurons: {distance}")
+
+        distances = linkage(neuron_positions)
+
+        clusters = fcluster(distances, distance, criterion = "distance")
+        
+        new_groups = {}
+        for i, cluster in enumerate(clusters):
+            if print_:
+                print(f"Neuron {i}: group {cluster}")
+            new_groups[i] = cluster
+
+        if print_:
+            if not "figsize" in args:
+                args["figsize"] = (8, 6)
+            plt.figure(figsize = args["figsize"])
+            dendrogram(distances)
+            plt.axhline(y = distance, color = "r", linestyle = "--")
+            plt.title("Dendrogram of Neurons")
+            plt.xlabel("Neuron Indexes")
+            plt.ylabel("Distances")
+            plt.show()
+            plt.clf()
+            plt.cla()
+                    
+        return new_groups
+
     def name(self):
         """
         Name of Neuron
@@ -959,7 +1013,7 @@ def create_SOM(x:int = 5, learning:float = 0.01):
             s = f"n{i}_{j}.connect(obj_r = {r_}, obj_l = {l_}, obj_u = {u_}, obj_d = {d_})"
             exec(s)
 
-    print("Use object n1_1, it is your starting point for SOM...\nTo prepare the SOM for your data: n1_1.design_weights(YOUR_DATA) \nTo start the SOM: n1_1.(dados)\n This function return the list of neurons")
+    print("Use object n1_1, it is your starting point for SOM...\nTo prepare the SOM for your data: n1_1.design_weights(YOUR_DATA) \nTo start the SOM: n1_1.auto_organizing(epochs = 100)\n This function return the list of neurons")
 
     if not "number_of_neurons_" in globals():
         globals()["number_of_neurons_"] = x
@@ -977,7 +1031,7 @@ if __name__ == "__main__":
     #print(sorted(a))
     #print(sorted(adjust(a)))
 
-    SOM = create_SOM(20, learning = 0.05)
+    SOM = create_SOM(10, learning = 0.05)
 
 ##    #Crio dados ficticios
 ##    dado_1 = uniform([3, 0], 2,times = 10)
@@ -991,33 +1045,38 @@ if __name__ == "__main__":
 ##            for k in range(0, 11, 1):
 ##                dados.append([i,j,k])
 
-##    import pandas as pd
-##    dados = pd.read_csv("DATA_CETESB_BY_CODE.csv")
-##    rotulos = list(map(lambda x: x[:2],list(dados["code"])))
-##
-##    c = dados.columns
-##    dados = dados.drop(columns = [*c[0:3],])
-##    c = dados.columns
-##    dados = dados.reindex(columns = [*c[-2:], *c[:-2]])
-##    #dados = dados.drop(columns = [*c[:-2]])
-##
-##    #dados = dados.apply(lambda x: (x - x.min()) / (x.max() - x.min()))
-##    
-##    dados = dados.values.tolist()
-##
-##    #Crio a grade que conecta a vizinhança:
-##    n1_1.design_weights(dados)
-##
-##    #Uma iteração de auto organização:
-##    n0_0.auto_organizing(epochs = 5, print_ = True)
-##
-##    clusters = n1_1.predict(labels = rotulos)
-##    new_clusters = adjust_clusters(clusters)
-##
-##    n1_1.valley(normalize = True, potency = 1)
-##
-##    n1_1.amount_of_wins()
+    import pandas as pd
+    dados = pd.read_csv("DATA_CETESB_BY_CODE.csv")
+    rotulos = list(map(lambda x: x[:2],list(dados["code"])))
 
+    c = dados.columns
+    dados = dados.drop(columns = [*c[0:3],])
+    c = dados.columns
+    dados = dados.reindex(columns = [*c[-2:], *c[:-2]])
+    #dados = dados.drop(columns = [*c[:-2]])
+
+    #dados = dados.apply(lambda x: (x - x.min()) / (x.max() - x.min()))
+    
+    dados = dados.values.tolist()
+
+    #Crio a grade que conecta a vizinhança:
+    n1_1.design_weights(dados)
+
+    #Uma iteração de auto organização:
+    n0_0.auto_organizing(epochs = 5, print_ = True)
+
+    clusters = n1_1.predict(labels = rotulos)
+    new_clusters = adjust_clusters(clusters)
+
+    #n1_1.valley(normalize = True, potency = 1)
+
+    #n1_1.amount_of_wins()
+
+    distance = n1_1.dendrogram()
+
+    print(distance)
+    print(adjust_clusters([0,1,1,2,3,7,8,8,7,6,6,5,5,5]))
+    
 ##
 ##
 ##
@@ -1041,33 +1100,33 @@ if __name__ == "__main__":
 ##        
 ##    new_clusters = adjust_clusters(clusters)   
 
-    import pandas as pd
-    dados = pd.read_csv("DATA_CETESB_MEAN.csv")
-    rotulos = list(map(lambda x: x[:2],list(dados["code"])))
-
-    c = dados.columns
-    dados = dados.drop(columns = [*c[0:2]])
-    dados = dados.drop(columns = ["mercury"])
-    dados = dados.drop(columns = [*c[-2:]])
-    c = dados.columns
-    dados = dados.reindex(columns = [*c[-2:], *c[:-2]])
-    conferir = dados.copy()
-    #dados = dados.drop(columns = [*c[:-2]])
-
-    #dados = dados.apply(lambda x: (x - x.min()) / (x.max() - x.min()))
-    
-    dados = dados.values.tolist()
-
-    #Crio a grade que conecta a vizinhança:
-    n1_1.design_weights(dados)
-
-    #Uma iteração de auto organização:
-    n0_0.auto_organizing(epochs = 20, print_ = True)
-
-    clusters = n1_1.predict(labels = rotulos)
-    new_clusters = adjust_clusters(clusters)
-
-    n1_1.valley(normalize = True, potency = 1)
-
-    n1_1.amount_of_wins()
+##    import pandas as pd
+##    dados = pd.read_csv("DATA_CETESB_MEAN.csv")
+##    rotulos = list(map(lambda x: x[:2],list(dados["code"])))
+##
+##    c = dados.columns
+##    dados = dados.drop(columns = [*c[0:2]])
+##    dados = dados.drop(columns = ["mercury"])
+##    dados = dados.drop(columns = [*c[-2:]])
+##    c = dados.columns
+##    dados = dados.reindex(columns = [*c[-2:], *c[:-2]])
+##    conferir = dados.copy()
+##    #dados = dados.drop(columns = [*c[:-2]])
+##
+##    #dados = dados.apply(lambda x: (x - x.min()) / (x.max() - x.min()))
+##    
+##    dados = dados.values.tolist()
+##
+##    #Crio a grade que conecta a vizinhança:
+##    n1_1.design_weights(dados)
+##
+##    #Uma iteração de auto organização:
+##    n0_0.auto_organizing(epochs = 5, print_ = True)
+##
+##    clusters = n1_1.predict(labels = rotulos)
+##    new_clusters = adjust_clusters(clusters)
+##
+##    n1_1.valley(normalize = True, potency = 1)
+##
+##    n1_1.amount_of_wins()
 
