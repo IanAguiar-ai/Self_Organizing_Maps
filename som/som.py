@@ -883,7 +883,7 @@ class Neuron:
         if print_:
             if not "figsize" in args:
                 args["figsize"] = (8, 6)
-            plt.figure(figsize = args["figsize"])
+            fig, ax = plt.subplots(figsize = args["figsize"])
             dendrogram(distances)
             plt.axhline(y = distance, color = "r", linestyle = "--")
             plt.title("Dendrogram of Neurons")
