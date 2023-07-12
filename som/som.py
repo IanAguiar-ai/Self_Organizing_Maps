@@ -24,10 +24,10 @@ def adjust_clusters(clusters:list, distance:int = None, groups:int = None):
     """
     Adjusts the excess clustering number
     """
-
+    clusters_ = clusters.copy()
     join = globals()["n1_1"].dendrogram(distance = distance, groups = groups, print_ = False)
-    for i in range(len(clusters)):
-        clusters[i] = join[clusters[i]]
+    for i in range(len(clusters_)):
+        clusters_[i] = join[clusters_[i]]
         
     
     clusters_new = []
@@ -1085,7 +1085,7 @@ if __name__ == "__main__":
     #Uma iteração de auto organização:
     n0_0.auto_organizing(epochs = 5, print_ = True)
 
-    clusters = n1_1.predict(labels = rotulos)
+    clusters = n1_1.predict()
     new_clusters = adjust_clusters(clusters)
 
     #n1_1.valley(normalize = True, potency = 1)
@@ -1097,8 +1097,8 @@ if __name__ == "__main__":
     distance = n1_1.dendrogram(groups = 3)
     
 ##    print(distance)
-    print(adjust_clusters([i for i in range(8*8)], distance = 0.3))
-    print(adjust_clusters([i for i in range(8*8)], groups = 3))
+    print(adjust_clusters(clusters, distance = 0.3))
+    print(adjust_clusters(clusters, groups = 50))
     
 ##
 ##
