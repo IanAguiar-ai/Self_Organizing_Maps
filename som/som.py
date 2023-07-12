@@ -11,6 +11,7 @@ from random import random, seed
 from time import time
 import warnings
 from scipy.cluster.hierarchy import dendrogram, linkage, fcluster
+from collections import Counter
 
 #import sys
 #sys.setrecursionlimit(999)
@@ -861,6 +862,11 @@ class Neuron:
         Shows the hierarchical grouping of the SOM
         """
 
+        def count(l:list):
+            contagem = Counter(l)
+            numero_itens_diferentes = len(contagem)
+            return numero_itens_diferentes
+
         neuron_positions = np.array(self.vector_of_weights())
         if distance == None:
             distance = np.mean(np.var(neuron_positions, axis = 0)**(1/2))
@@ -876,11 +882,11 @@ class Neuron:
             d = 0
             clusters = fcluster(distances, d, criterion = "distance")
             interations = 0
-            while max(clusters) != groups and interations < 10000:
+            while count(clusters) != groups and interations < 10000:
                 clusters = fcluster(distances, d, criterion = "distance")
-                if max(clusters) > groups:
+                if count(clusters) > groups:
                     d += d_
-                if max(clusters) < groups:
+                if count(clusters) < groups:
                     d_ /= 2
                     d -= d_
                 interations += 1
@@ -1092,7 +1098,7 @@ if __name__ == "__main__":
     
 ##    print(distance)
     print(adjust_clusters([i for i in range(8*8)], distance = 0.3))
-    print(adjust_clusters([i for i in range(8*8)], groups = 10))
+    print(adjust_clusters([i for i in range(8*8)], groups = 3))
     
 ##
 ##
