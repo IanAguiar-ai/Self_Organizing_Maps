@@ -884,6 +884,8 @@ class Neuron:
                     d_ /= 2
                     d -= d_
                 interations += 1
+                #print(d, d_, max(clusters))
+                distance = d
         
         new_groups = {}
         for i, cluster in enumerate(clusters):
@@ -898,11 +900,11 @@ class Neuron:
             dendrogram(distances)
             plt.axhline(y = distance, color = "r", linestyle = "--")
             plt.title("Dendrogram of Neurons")
-            plt.xlabel("Neuron Indexes")
-            plt.ylabel("Distances")
+            ax.set_xlabel("Neuron Indexes")
+            ax.set_ylabel("Distances")
             plt.show()
-            plt.clf()
-            plt.cla()
+            #plt.clf()
+            #plt.cla()
                     
         return new_groups
 
@@ -1085,10 +1087,12 @@ if __name__ == "__main__":
     #n1_1.amount_of_wins()
 
     distance = n1_1.dendrogram()
-
-    print(distance)
-    print(adjust_clusters([0,1,1,2,3,7,8,8,7,6,6,5,5,5], distance = 0.3))
-    print(adjust_clusters([0,1,1,2,3,7,8,8,7,6,6,5,5,5], groups = 3))
+    distance = n1_1.dendrogram(distance = 0.3)
+    distance = n1_1.dendrogram(groups = 3)
+    
+##    print(distance)
+    print(adjust_clusters([i for i in range(8*8)], distance = 0.3))
+    print(adjust_clusters([i for i in range(8*8)], groups = 10))
     
 ##
 ##
