@@ -32,15 +32,15 @@ def adjust_clusters(clusters:list, distance:int = None, groups:int = None):
     
     clusters_new = []
     c_ = {}
-    c_sort = sorted(clusters)
+    c_sort = sorted(clusters_)
     i = 0
     for cl in c_sort:
         if not cl in c_:
             c_[cl] = i
             i += 1    
 
-    for i in range(len(clusters)):
-        clusters_new.append(c_[clusters[i]])
+    for i in range(len(clusters_)):
+        clusters_new.append(c_[clusters_[i]])
     return clusters_new
 
 def transpose(data):
@@ -1098,7 +1098,7 @@ if __name__ == "__main__":
     
 ##    print(distance)
     print(adjust_clusters(clusters, distance = 0.3))
-    print(adjust_clusters(clusters, groups = 50))
+    print(adjust_clusters(clusters, groups = 10))
     
 ##
 ##
