@@ -19,15 +19,12 @@ class GeneralError(Exception):
     def __init__(self, mensage):
         self.mensage = mensage
 
-def adjust_clusters(clusters:list, distance = None):
+def adjust_clusters(clusters:list, distance:int = None, groups:int = None):
     """
     Adjusts the excess clustering number
     """
 
-    if distance == None:
-        join = globals()["n1_1"].dendrogram(print_ = False)
-    else:
-        join = globals()["n1_1"].dendrogram(distance = distance, print_ = False)
+    join = globals()["n1_1"].dendrogram(distance = distance, groups = groups, print_ = False)
     for i in range(len(clusters)):
         clusters[i] = join[clusters[i]]
         
@@ -594,7 +591,7 @@ class Neuron:
                             
                     return rotate()
 
-    def valley(self, normalize = False, potency = 1, **args):
+    def valley(self, normalize:bool = False, potency:float = 1, **args):
         """
         Makes a graph showing the valleys (matrix-U), clearly separated valleys indicate a possible group
         """
@@ -739,7 +736,7 @@ class Neuron:
         else:
             plt.show()
 
-    def predict(self, labels = None, **args):
+    def predict(self, labels:list = None, **args):
         """
         Returns the predictions by neuron in addition to a graph if you pass the labels "labels:list"
         """
@@ -859,7 +856,7 @@ class Neuron:
                         min_ = dist(l_global[i][j], observation)
             return clusters_temp
 
-    def dendrogram(self, distance = None, print_ = True, **args):
+    def dendrogram(self, distance:float = None, groups:int = None, print_:bool = True, **args):
         """
         Shows the hierarchical grouping of the SOM
         """
@@ -870,9 +867,23 @@ class Neuron:
         if print_:
             print(f"Max distance to join neurons: {distance}")
 
-        distances = linkage(neuron_positions)
 
-        clusters = fcluster(distances, distance, criterion = "distance")
+        distances = linkage(neuron_positions)
+        if groups == None:
+            clusters = fcluster(distances, distance, criterion = "distance")
+        else:
+            d_ = 0.5
+            d = 0
+            clusters = fcluster(distances, d, criterion = "distance")
+            interations = 0
+            while max(clusters) != groups and interations < 10000:
+                clusters = fcluster(distances, d, criterion = "distance")
+                if max(clusters) > groups:
+                    d += d_
+                if max(clusters) < groups:
+                    d_ /= 2
+                    d -= d_
+                interations += 1
         
         new_groups = {}
         for i, cluster in enumerate(clusters):
@@ -883,7 +894,7 @@ class Neuron:
         if print_:
             if not "figsize" in args:
                 args["figsize"] = (8, 6)
-            plt.figure(figsize = args["figsize"])
+            fig, ax = plt.subplots(figsize = args["figsize"])
             dendrogram(distances)
             plt.axhline(y = distance, color = "r", linestyle = "--")
             plt.title("Dendrogram of Neurons")
@@ -1031,7 +1042,7 @@ if __name__ == "__main__":
     #print(sorted(a))
     #print(sorted(adjust(a)))
 
-    SOM = create_SOM(10, learning = 0.05)
+    SOM = create_SOM(8, learning = 0.05)
 
 ##    #Crio dados ficticios
 ##    dado_1 = uniform([3, 0], 2,times = 10)
@@ -1050,9 +1061,10 @@ if __name__ == "__main__":
     rotulos = list(map(lambda x: x[:2],list(dados["code"])))
 
     c = dados.columns
-    dados = dados.drop(columns = [*c[0:3],])
+    dados = dados.drop(columns = [*c[0:3],*c[-2:]])
     c = dados.columns
-    dados = dados.reindex(columns = [*c[-2:], *c[:-2]])
+    #dados = dados.reindex(columns = [*c[-2:], *c[:-2]])
+    
     #dados = dados.drop(columns = [*c[:-2]])
 
     #dados = dados.apply(lambda x: (x - x.min()) / (x.max() - x.min()))
@@ -1075,7 +1087,8 @@ if __name__ == "__main__":
     distance = n1_1.dendrogram()
 
     print(distance)
-    print(adjust_clusters([0,1,1,2,3,7,8,8,7,6,6,5,5,5]))
+    print(adjust_clusters([0,1,1,2,3,7,8,8,7,6,6,5,5,5], distance = 0.3))
+    print(adjust_clusters([0,1,1,2,3,7,8,8,7,6,6,5,5,5], groups = 3))
     
 ##
 ##
