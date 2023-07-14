@@ -1,6 +1,6 @@
 '''
 Self-Organizing Maps
-Last Modify: 07-07-2023
+Last Modify: 14-07-2023
 '''
 
 import numpy as np
@@ -241,7 +241,11 @@ class Neuron:
     2) n1_1.design_weights(dados)
     3) n0_0.auto_organizing(epochs = 10, print_ = True)
     4) n1_1.valley(normalize = True, potency = 1)
-    5) n1_1.amount_of_wins()    
+    5) n1_1.amount_of_wins()
+    6) clusters = n1_1.predict()
+    7) n1_1.dendrogram(groups = 10)
+    8) clusters_final = adjust_clusters(clusters, groups = 5)
+    9) n1_1.optimum(min, davies_bouldin_score, variable = "labels", X = globals()["global_som_data"])
     """
     def __init__(self, learning = 0.01):
         self.learning = learning
@@ -882,7 +886,7 @@ class Neuron:
             d = 0
             clusters = fcluster(distances, d, criterion = "distance")
             interations = 0
-            while count(clusters) != groups and interations < 10000:
+            while count(clusters) != groups and interations < 20000:
                 clusters = fcluster(distances, d, criterion = "distance")
                 if count(clusters) > groups:
                     d += d_
@@ -913,6 +917,32 @@ class Neuron:
             #plt.cla()
                     
         return new_groups
+
+    def optimum(self, t, metric, variable, **args):
+        """
+        Find the optimal cut in the dendrogram according to a metric
+        """
+        clusters = self.predict()
+        
+        values = {}
+        for i in range(2, globals()["number_of_neurons_"] ** 2):
+            args[variable] = adjust_clusters(clusters, groups = i)
+            values[i] = metric(**args)
+
+        for i in values.keys():
+            if values[i] == t(values.values()):
+                resp = i
+
+        make = str(t)
+        met = str(metric)
+        a = make[make.find('function') + len('function '):-1]
+        b_ = met[met.find('function') + len('function '):].find(" ")
+        b = met[met.find('function') + len('function '):]
+        b = b[:b_]
+        print(f"To {a} the {b} use {resp}(value = {str(values[resp])[:6]}) clusters!\n")
+
+        return [values[resp], resp]
+            
 
     def name(self):
         """
@@ -987,6 +1017,9 @@ def create_SOM(x:int = 5, learning:float = 0.01):
     4) n1_1.valley(normalize = True, potency = 1)
     5) n1_1.amount_of_wins()
     6) clusters = n1_1.predict()
+    7) n1_1.dendrogram(groups = 10)
+    8) clusters_final = adjust_clusters(clusters, groups = 5)
+    9) n1_1.optimum(min, davies_bouldin_score, variable = "labels", X = globals()["global_som_data"])
     """
 
     if "number_of_neurons_" in globals():
@@ -1083,7 +1116,7 @@ if __name__ == "__main__":
     n1_1.design_weights(dados)
 
     #Uma iteração de auto organização:
-    n0_0.auto_organizing(epochs = 5, print_ = True)
+    n0_0.auto_organizing(epochs = 20, print_ = True)
 
     clusters = n1_1.predict()
     new_clusters = adjust_clusters(clusters)
@@ -1092,13 +1125,18 @@ if __name__ == "__main__":
 
     #n1_1.amount_of_wins()
 
-    distance = n1_1.dendrogram()
-    distance = n1_1.dendrogram(distance = 0.3)
-    distance = n1_1.dendrogram(groups = 3)
+##    distance = n1_1.dendrogram()
+##    distance = n1_1.dendrogram(distance = 0.3)
+##    distance = n1_1.dendrogram(groups = 3)
+
+    from sklearn.metrics import calinski_harabasz_score, davies_bouldin_score, silhouette_samples, silhouette_score
+    n1_1.optimum(min, davies_bouldin_score, variable = "labels", X = globals()["global_som_data"])
+    n1_1.optimum(max, calinski_harabasz_score, variable = "labels", X = globals()["global_som_data"])
+    n1_1.optimum(max, silhouette_score, variable = "labels", X = globals()["global_som_data"])
     
 ##    print(distance)
-    print(adjust_clusters(clusters, distance = 0.3))
-    print(adjust_clusters(clusters, groups = 10))
+##    print(adjust_clusters(clusters, distance = 0.3))
+##    print(adjust_clusters(clusters, groups = 10))
     
 ##
 ##
