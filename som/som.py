@@ -596,7 +596,7 @@ class Neuron:
                             
                     return rotate()
 
-    def valley(self, normalize:bool = False, potency:float = 1, **args):
+    def valley(self, normalize:bool = True, potency:float = 1, **args):
         """
         Makes a graph showing the valleys (matrix-U), clearly separated valleys indicate a possible group
         """
@@ -637,15 +637,16 @@ class Neuron:
                         pass
                     l[i][j] = v_/v__
                     #print(i,j,l[i][j],v_,v__)
-
+                    
         s = [i[:] for i in l]
-    
-        m = 0
+
+        m = -1
         if normalize:
             for i in range(len(l)):
                 for j in range(len(l[0])):
                     if l[i][j] > m:
                         m = l[i][j]
+                        print(m,"normalize")
 
             for i in range(len(l)):
                 for j in range(len(l[0])):
@@ -658,6 +659,9 @@ class Neuron:
                 except ValueError:
                     warnings.warn(f"Overflow in line {i} column {j}")
                     l[i][j] = [0, 0, 0]
+
+        for s__ in l:
+            print(list(map(lambda x: str(x[0]), s__))) ###################
 
         if not "figsize" in args:
             args["figsize"] = (7,5)
@@ -1075,9 +1079,7 @@ def create_SOM(x:int = 5, learning:float = 0.01):
 
 #Example:
 if __name__ == "__main__":
-
-    seed(12)
-
+    
     #from random import random
     #a = [random()*random()*random() for i in range(5)]
     #print(sorted(a))
