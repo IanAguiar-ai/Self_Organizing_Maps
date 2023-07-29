@@ -660,8 +660,8 @@ class Neuron:
                     warnings.warn(f"Overflow in line {i} column {j}")
                     l[i][j] = [0, 0, 0]
 
-        for s__ in l:
-            print(list(map(lambda x: str(x[0]), s__))) ###################
+##        for s__ in l:
+##            print(list(map(lambda x: str(x[0]), s__))) ###################
 
         if not "figsize" in args:
             args["figsize"] = (7,5)
