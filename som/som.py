@@ -646,7 +646,7 @@ class Neuron:
                 for j in range(len(l[0])):
                     if l[i][j] > m:
                         m = l[i][j]
-                        print(m,"normalize")
+                        #print(m,"normalize")
 
             for i in range(len(l)):
                 for j in range(len(l[0])):
