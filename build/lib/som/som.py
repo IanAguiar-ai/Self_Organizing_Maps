@@ -20,7 +20,7 @@ class GeneralError(Exception):
     def __init__(self, mensage):
         self.mensage = mensage
 
-def adjust_clusters(clusters:list, distance:int = None, groups:int = None):
+def adjust_clusters(clusters:list, distance:int = None, groups:int = None, recursion = False):
     """
     Adjusts the excess clustering number
     """
@@ -44,13 +44,12 @@ def adjust_clusters(clusters:list, distance:int = None, groups:int = None):
     for i in range(len(clusters_)):
         clusters_new.append(c_[clusters_[i]])
 
-    if not "recursion_" in globals():
+    if not recursion:
         if groups != None :
             groups_new = groups
-            globals()["recursion_"] = True
             while max(clusters_new) + 1 < groups and groups < globals()["number_of_neurons_"] ** 2:
                 #print(max(clusters_new) + 1, groups, globals()["number_of_neurons_"] ** 2, groups_new)
-                clusters_new = adjust_clusters(clusters = clusters, groups = groups_new)
+                clusters_new = adjust_clusters(clusters = clusters, groups = groups_new, recursion = True)
                 groups_new += 1
         
     return clusters_new
@@ -1116,9 +1115,9 @@ if __name__ == "__main__" :
 
     clusters = n1_1.predict(labels = list(y))
 
-    cluster_3_groups = adjust_clusters(clusters, groups = 3)
+    cluster_3_groups = adjust_clusters(clusters, groups = 14)
 
-    dict_groups = n1_1.dendrogram(groups = 6)
+    #dict_groups = n1_1.dendrogram(groups = 6)
 
     print(f"number of groups = {max(cluster_3_groups) + 1}")
 
