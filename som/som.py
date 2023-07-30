@@ -48,7 +48,7 @@ def adjust_clusters(clusters:list, distance:int = None, groups:int = None, recur
         if groups != None :
             groups_new = groups
             while max(clusters_new) + 1 < groups and groups_new < globals()["number_of_neurons_"] ** 2:
-                print(max(clusters_new) + 1, groups, globals()["number_of_neurons_"] ** 2, groups_new)
+                #print(max(clusters_new) + 1, groups, globals()["number_of_neurons_"] ** 2, groups_new)
                 clusters_new = adjust_clusters(clusters = clusters, groups = groups_new, recursion = True)
                 groups_new += 1
         
