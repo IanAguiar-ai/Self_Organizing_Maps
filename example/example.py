@@ -21,7 +21,7 @@ import som.som as som
 help(som)
 ```
 
-## Choosing any dataset to use SOM
+## Choosing any dataset to use SOM:
 """
 
 from sklearn.datasets import load_iris
@@ -31,7 +31,7 @@ iris = load_iris()
 X = iris.data  # Features
 y = iris.target  # Targets
 
-"""## Starting the SOM object"""
+"""## Starting the SOM object:"""
 
 SOM = som.create_SOM(5, learning = 0.05) #In this case, the SOM is a 10x10 grid, that is, there are 10 neurons
 
@@ -61,7 +61,7 @@ print(cluster_3_groups)
 
 dict_groups = som.n1_1.dendrogram(groups = 4)
 
-"""# Using library **metrics** to assess cluster quality"""
+"""# Using library **metrics** to assess cluster quality:"""
 
 !pip install git+https://github.com/IanAguiar-ai/metrics.git
 
