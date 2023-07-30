@@ -26,7 +26,9 @@ def adjust_clusters(clusters:list, distance:int = None, groups:int = None):
     """
     clusters_ = clusters.copy()
     join = globals()["n1_1"].dendrogram(distance = distance, groups = groups, print_ = False)
+    #print(join)
     for i in range(len(clusters_)):
+        #print(clusters_[i], join[clusters_[i]])
         clusters_[i] = join[clusters_[i]]
         
     
@@ -37,10 +39,20 @@ def adjust_clusters(clusters:list, distance:int = None, groups:int = None):
     for cl in c_sort:
         if not cl in c_:
             c_[cl] = i
-            i += 1    
+            i += 1
 
     for i in range(len(clusters_)):
         clusters_new.append(c_[clusters_[i]])
+
+    if not "recursion_" in globals():
+        if groups != None :
+            groups_new = groups
+            globals()["recursion_"] = True
+            while max(clusters_new) + 1 < groups and groups < globals()["number_of_neurons_"] ** 2:
+                print(max(clusters_new) + 1, groups, globals()["number_of_neurons_"] ** 2, groups_new)
+                clusters_new = adjust_clusters(clusters = clusters, groups = groups_new)
+                groups_new += 1
+        
     return clusters_new
 
 def transpose(data):
@@ -261,12 +273,21 @@ class Neuron:
         #Amount of data the neuron gains
         self.number_of_wins = 0
 
-    def vector_of_weights(self):
+    def vector_of_weights(self, winners = False):
         vector = []
-        for i in range(globals()["number_of_neurons_"]):
-            for j in range(globals()["number_of_neurons_"]):
-                vector.append(globals()[f"n{i}_{j}"].weights)
-        return vector
+        if winners:
+            k = []
+            for i in range(globals()["number_of_neurons_"]):
+                for j in range(globals()["number_of_neurons_"]):
+                    if globals()[f"n{i}_{j}"].number_of_wins > 0:
+                        vector.append(globals()[f"n{i}_{j}"].weights)
+                        k.append(i*globals()["number_of_neurons_"] + j)
+            return vector, k
+        else:
+            for i in range(globals()["number_of_neurons_"]):
+                for j in range(globals()["number_of_neurons_"]):
+                    vector.append(globals()[f"n{i}_{j}"].weights)
+            return vector
                 
 
     def connect(self, obj_r = None, obj_l = None, obj_u = None, obj_d = None):
@@ -890,7 +911,7 @@ class Neuron:
             d = 0
             clusters = fcluster(distances, d, criterion = "distance")
             interations = 0
-            while count(clusters) != groups and interations < 20000:
+            while count(clusters) != groups and interations < 10000:
                 clusters = fcluster(distances, d, criterion = "distance")
                 if count(clusters) > groups:
                     d += d_
@@ -1078,7 +1099,31 @@ def create_SOM(x:int = 5, learning:float = 0.01):
 
 
 #Example:
-if __name__ == "__main__":
+
+if __name__ == "__main__" :
+    from sklearn.datasets import load_iris
+
+    iris = load_iris()
+
+    X = iris.data  # Features
+    y = iris.target  # Targets
+
+    SOM = create_SOM(5, learning = 0.05) #In this case, the SOM is a 10x10 grid, that is, there are 10 neurons
+
+    n1_1.design_weights(X)
+
+    n0_0.auto_organizing(epochs = 20, print_ = True) #20 interations
+
+    clusters = n1_1.predict(labels = list(y))
+
+    cluster_3_groups = adjust_clusters(clusters, groups = 3)
+
+    dict_groups = n1_1.dendrogram(groups = 6)
+
+    print(f"number of groups = {max(cluster_3_groups) + 1}")
+
+
+if __name__ == "__main__" and 1 == 2:
     
     #from random import random
     #a = [random()*random()*random() for i in range(5)]
