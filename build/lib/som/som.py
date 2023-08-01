@@ -258,6 +258,8 @@ class Neuron:
     8) clusters_final = adjust_clusters(clusters, groups = 5)
     9) n1_1.optimum(min, davies_bouldin_score, variable = "labels", X = globals()["global_som_data"])
     """
+    __slots__ = ["learning", "weights", "con_r", "con_l", "con_u", "con_d", "number_of_wins"]
+    
     def __init__(self, learning = 0.01):
         self.learning = learning
         self.weights = None
@@ -418,7 +420,6 @@ class Neuron:
                 else:
                     break
 
-            
             for observation in data:
                 min_ = root_true
                 new_ = root_true
@@ -431,7 +432,7 @@ class Neuron:
                 while run:
                     #Descobre se é o mínimo:
                     new_dist = new_.distance(observation)
-                    new_.number_od_wins = 0
+                    new_.number_of_wins = 0
                     if min_len > new_dist: #Winner
                         #print(new_.name(), "-->", min_.name())
                         min_ = new_
@@ -1144,7 +1145,7 @@ if __name__ == "__main__" and 1 == 2:
 ##                dados.append([i,j,k])
 
     import pandas as pd
-    dados = pd.read_csv("DATA_CETESB_BY_CODE.csv")
+    dados = pd.read_csv("C:\\Users\\Usuario\\Desktop\\DATA_CETESB_BY_CODE.csv")
     rotulos = list(map(lambda x: x[:2],list(dados["code"])))
 
     c = dados.columns
