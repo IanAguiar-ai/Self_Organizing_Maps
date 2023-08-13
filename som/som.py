@@ -344,15 +344,21 @@ class Neuron:
         """
         Calculates the distance
         """
-        sum_ = 0
-        for i in range(len(obs)):
-            try:
-                sum_ += (self.weights[i] - obs[i])**2
-            except Exception as error:
-                print(error)
-                print(self.name())
-                input("Pause...")
-        return sum_**(1/2)        
+        try:
+            squared_diffs = [(w - o) ** 2 for w, o in zip(self.weights, obs)]
+            sum_of_squared_diffs = sum(squared_diffs)
+            distance = sum_of_squared_diffs ** 0.5
+            return distance
+        except:
+            sum_ = 0
+            for i in range(len(obs)):
+                try:
+                    sum_ += (self.weights[i] - obs[i])**2
+                except Exception as error:
+                    print(error)
+                    print(self.name())
+                    input("Pause...")
+            return sum_**(1/2)    
 
     def auto_organizing(self, data:list = None, epochs:int = 1, print_:bool = False):
         """
@@ -464,7 +470,7 @@ class Neuron:
         
         try:
             for i in move:
-                s = s @ i
+                s = s.__matmul__(i)
 
             for k in range(len(obs)):
                 s.weights[k] -= (s.weights[k] - obs[k])*s.learning/n
@@ -481,12 +487,8 @@ class Neuron:
         '''
         n = 32
         
-        change = []
-        for i in range(len(obs)):
-            change.append(self.weights[i] - obs[i])
-
-        for k in range(len(change)):
-            self.weights[k] -= change[k]*self.learning
+        changes = [self.weights[k] - o for k, o in enumerate(obs)]
+        self.weights = [w - c * self.learning for w, c in zip(self.weights, changes)]
 
         #interation 1
         i1 = n
